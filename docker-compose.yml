@@ -11,5 +11,5 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/app  # Optional: bind-mount current dir (dev only)
+      - .:/app  
     restart: unless-stopped
