@@ -1,11 +1,11 @@
 import google.generativeai as genai
-from google import genai
 from ..config import GEMINI_KEY
 import json
 import re
 
-client=genai.Client(api_key=GEMINI_KEY)
-
+# Configure Gemini API client
+genai.configure(api_key=GEMINI_KEY)
+model = genai.GenerativeModel("gemini-1.5-flash")  # Or "gemini-pro"
 
 def evaluate_interview(jd: str, questions: list[str], answers: list[str]) -> dict:
     prompt = f"""
@@ -31,14 +31,13 @@ def evaluate_interview(jd: str, questions: list[str], answers: list[str]) -> dic
     {json.dumps(answers)}
     """
 
-    resp = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+    resp = model.generate_content(prompt)
     text = resp.text.strip()
 
-    # ✅ Remove ```json or other formatting artifacts
+    # Clean up code block formatting if present
     clean_json = re.sub(r"^```json|```$", "", text.strip(), flags=re.MULTILINE).strip()
 
     try:
         return json.loads(clean_json)
     except json.JSONDecodeError as e:
-        # Fallback in case Gemini returns slightly broken JSON
         raise ValueError(f"Invalid JSON from Gemini: {e}\n\nReceived:\n{text}")
