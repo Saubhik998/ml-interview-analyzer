@@ -1,17 +1,23 @@
 from fastapi import FastAPI
-from .routers import generate, evaluate, next_question  # new router added
+from .routers import generate, evaluate, next_question  # your routers
 
-app = FastAPI()
+app = FastAPI(
+    title="AI Interview API",
+    description="Generates questions, evaluates answers, and handles interview logic using Gemini",
+    version="1.0.0"
+)
 
-# Route for generating initial questions from JD
-app.include_router(generate.router, prefix="/api")
+# Include routers
+app.include_router(generate.router, prefix="/api", tags=["Question Generator"])
+app.include_router(evaluate.router, prefix="/api", tags=["Evaluation"])
+app.include_router(next_question.router, prefix="/api", tags=["Follow-Up Question"])
 
-# Route for evaluating the final report
-app.include_router(evaluate.router, prefix="/api")
-
-# Route for generating the next question based on the user's last answer
-app.include_router(next_question.router, prefix="/api")
-
-@app.get("/")
+# Root endpoint
+@app.get("/", tags=["Root"])
 async def root():
     return {"ok": True}
+
+# Health check endpoint 
+@app.get("/healthz", tags=["Health"], summary="Health Check", description="Simple health check endpoint.")
+async def health_check():
+    return {"status": "healthy"}

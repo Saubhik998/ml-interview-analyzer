@@ -1,15 +1,22 @@
+import logging
 import google.generativeai as genai
 from ..config import GEMINI_KEY
 import json
 import re
 
-# Configure Gemini API client
+# Configure Gemini
 genai.configure(api_key=GEMINI_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")  # Or "gemini-pro"
+
+# Initialize logger
+logger = logging.getLogger(__name__)
+
+# Load model
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 def evaluate_interview(jd: str, questions: list[str], answers: list[str]) -> dict:
+
     prompt = f"""
-    Based on the following job description, questions, and candidate answers, evaluate the candidate with and return a JSON with this exact format:
+    Based on the following job description, questions, and candidate answers, evaluate the candidate and return a JSON in this exact format:
 
     {{
       "jd": string,
@@ -31,13 +38,24 @@ def evaluate_interview(jd: str, questions: list[str], answers: list[str]) -> dic
     {json.dumps(answers)}
     """
 
-    resp = model.generate_content(prompt)
-    text = resp.text.strip()
-
-    # Clean up code block formatting if present
-    clean_json = re.sub(r"^```json|```$", "", text.strip(), flags=re.MULTILINE).strip()
-
     try:
-        return json.loads(clean_json)
+        response = model.generate_content(prompt)
+        raw_text = response.text.strip()
+
+        # Remove any ```json or markdown wrappers
+        clean_json = re.sub(r"^```json|```$", "", raw_text, flags=re.MULTILINE).strip()
+
+        # Parse JSON
+        evaluation = json.loads(clean_json)
+
+        logger.info("Successfully parsed Gemini evaluation response.")
+        return evaluation
+
     except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON from Gemini: {e}\n\nReceived:\n{text}")
+        logger.error("JSON decode error in Gemini response: %s", e)
+        logger.debug("Raw response text: %s", raw_text)
+        raise ValueError("Gemini response is not valid JSON.")
+
+    except Exception as e:
+        logger.error("Failed to generate evaluation from Gemini: %s", e)
+        raise RuntimeError("Failed to generate evaluation from Gemini.")
