@@ -1,8 +1,15 @@
+import logging
 import google.generativeai as genai
 from ..config import GEMINI_KEY
 
+# Configure Gemini API with your API key
 genai.configure(api_key=GEMINI_KEY)
+
+# Initialize the generative model once, globally
 model = genai.GenerativeModel("gemini-2.0-flash")
+
+# Set up logger
+logger = logging.getLogger(__name__)
 
 def generate_first_question(jd: str) -> str:
     prompt = f"""
@@ -14,13 +21,11 @@ Only return the question. No numbering. No formatting. No extra explanation.
 
 Job Description:
 \"\"\"{jd}\"\"\"
-
-
 """
-
     try:
         response = model.generate_content(prompt)
         return response.text.strip()
+
     except Exception as e:
-        print("Error generating first question:", e)
-        return "Could you briefly introduce yourself?"
+        logger.error("Error generating first question: %s", e)
+        raise RuntimeError("Failed to generate first question")
