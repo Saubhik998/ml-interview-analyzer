@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
+from fastapi import HTTPException
 from app.services.evaluation_service import evaluate_interview
 
 @patch("app.services.evaluation_service.model.generate_content")
@@ -41,8 +42,11 @@ def test_evaluate_interview_invalid_json(mock_generate):
     questions = ["Q1"]
     answers = ["A1"]
 
-    with pytest.raises(ValueError, match="Gemini response is not valid JSON"):
+    with pytest.raises(HTTPException) as exc_info:
         evaluate_interview(jd, questions, answers)
+
+    assert exc_info.value.status_code == 502
+    assert "malformed JSON" in exc_info.value.detail
 
 @patch("app.services.evaluation_service.model.generate_content")
 def test_evaluate_interview_gemini_failure(mock_generate):
@@ -53,5 +57,8 @@ def test_evaluate_interview_gemini_failure(mock_generate):
     questions = ["Q1"]
     answers = ["A1"]
 
-    with pytest.raises(RuntimeError, match="Failed to generate evaluation from Gemini"):
+    with pytest.raises(HTTPException) as exc_info:
         evaluate_interview(jd, questions, answers)
+
+    assert exc_info.value.status_code == 500
+    assert "Failed to generate AI evaluation" in exc_info.value.detail
