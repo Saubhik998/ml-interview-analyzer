@@ -32,7 +32,7 @@ def test_evaluate_endpoint_missing_fields():
     }
 
     response = client.post("/api/evaluate", json=payload)
-    assert response.status_code == 422  # Unprocessable Entity due to Pydantic validation
+    assert response.status_code == 422  
 
 @patch("app.routers.evaluate.evaluate_interview")
 
