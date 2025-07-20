@@ -11,5 +11,11 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/app  
+      - .:/app
+    networks:
+      - app-network
     restart: unless-stopped
+
+networks:
+  app-network:
+    external: true

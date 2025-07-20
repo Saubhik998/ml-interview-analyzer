@@ -18,7 +18,7 @@ def evaluate_interview(jd: str, questions: list[str], answers: list[str]) -> dic
     # Example schema with concrete JSON to guide output
     schema_example = json.dumps({
         "jd": "...",
-        "score": 0,
+        "score": "<number between 0 and 100>",
         "questions": ["..."],
         "answers": ["..."],
         "strengths": ["..."],
