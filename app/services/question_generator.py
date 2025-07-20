@@ -15,7 +15,7 @@ def generate_first_question(jd: str) -> str:
     prompt = f"""
 You are an expert technical interviewer.
 
-Based on the following job description, ask the **first** interview question to a candidate.
+Based on the following job description, ask the **first** interview question to a candidate just based on technical knowledge no previous experience and projects.
 
 Only return the question. No numbering. No formatting. No extra explanation.
 
