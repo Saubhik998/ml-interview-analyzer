@@ -42,8 +42,7 @@ These instructions will help you set up and run the AI Interview API locally.
 1. Clone the repository:
 
    ```bash
-   git clone <repo-url>
-   cd ai_interview_api
+   git clone <https://github.com/Saubhik998/ml-interview-analyzer>
    ```
 2. Create & activate a virtual environment:
 
