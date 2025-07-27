@@ -1,139 +1,189 @@
-## AI Interview API
+# 🎤 AudioInterviewer – AI-Powered Interview Evaluation API
 
-A FastAPI-based backend service that leverages Google Gemini to generate interview questions, evaluate candidate answers, and suggest follow-up questions.
+## 📘 Overview
 
-### Features
+**AudioInterviewer** is an AI-driven backend system designed to:
 
-* **Question Generation**: Generate a series of interview questions based on a user-provided topic or role.
-* **Answer Evaluation**: Evaluate candidate responses and provide feedback.
-* **Follow-Up Questions**: Suggest the next best question based on previous answers.
-* **Health Check**: Simple `/healthz` endpoint for service monitoring.
+* Generate intelligent interview questions based on a job description (JD)
+* Evaluate candidate answers using LLMs (e.g., Gemini)
+* Dynamically ask follow-up questions based on previous responses
 
----
-
-## Table of Contents
-
-1. [Getting Started](#getting-started)
-2. [Prerequisites](#prerequisites)
-3. [Installation](#installation)
-4. [Running the API](#running-the-api)
-5. [Running Tests](#running-tests)
-6. [Docker Setup](#docker-setup)
-7. [Folder Structure](#folder-structure)
-8. [Environment Variables](#environment-variables)
-9. [Contributing](#contributing)
-10. [License](#license)
+This FastAPI-based backend serves as the AI/ML component for an audio interview platform, integrating advanced NLP for candidate evaluation.
 
 ---
 
-## Getting Started
+## 📂 Project Structure  
 
-These instructions will help you set up and run the AI Interview API locally.
+```
+├── app/
+│   ├── main.py                   # Entry point (FastAPI setup)
+│   ├── config.py                 # Environment configuration
+│   ├── routers/                 # API endpoints
+│   │   ├── evaluate.py
+│   │   ├── generate.py
+│   │   └── next_question.py
+│   ├── services/                # Core logic (AI interactions)
+│   │   ├── evaluation_service.py
+│   │   ├── question_generator.py
+│   │   └── next_question_service.py
+│   └── schemas/                 # Pydantic models
+├── tests/                       # Pytest-based unit tests
+         |── test_generate.py
+         |── test_next_question.py
+         |── test_evaluate.py                     
+├── Dockerfile                   # Docker container setup
+├── docker-compose.yml           # Optional service composition
+├── requirements.txt             # Python dependencies
+└── README.md                    # This file
+```
 
-## Prerequisites
+---
 
-* Python 3.11+
-* pip
-* Docker (for containerized setup)
-* [Google Gemini API key](https://developers.google.com/)
+## 🚀 How It Works
 
-## Installation
+### 1. **Initial Question Generation**
 
-1. Clone the repository:
+* **Endpoint**: `POST /generate`
+* **Input**: Job Description (`job_description: str`)
+* **Output**: A list of 5 AI-generated interview questions
+* **Handled by**: `question_generator.py`
 
-   ```bash
-   git clone <https://github.com/Saubhik998/ml-interview-analyzer>
-   ```
-2. Create & activate a virtual environment:
+### 2. **Dynamic Follow-up Questions**
 
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # macOS/Linux
-   venv\\Scripts\\activate  # Windows
-   ```
-3. Install dependencies:
+* **Endpoint**: `POST /next-question`
+* **Input**: Previous Q\&A pair
+* **Output**: A follow-up question tailored to the candidate's last answer
+* **Handled by**: `next_question_service.py`
 
-   ```bash
-   pip install --upgrade pip
-   pip install -r requirements.txt
-   ```
+### 3. **Answer Evaluation**
 
-## Running the API
+* **Endpoint**: `POST /evaluate`
+* **Input**: JD, question, and transcript
+* **Output**: A detailed assessment with:
 
-1. Copy the example `.env` and set your Gemini API key:
+  * Candidate Fit Score
+  * Strengths
+  * Improvement Areas
+  * Follow-up Suggestions
+* **Handled by**: `evaluation_service.py` (uses Gemini API or similar LLM)
 
-   ```bash
-   cp .env.example .env
-   # then edit .env
-   ```
-2. Start the FastAPI server:
+---
 
-   ```bash
-   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-   ```
-3. Access the documentation at `http://localhost:8000/docs`.
+## 🛠 Configuration
 
-## Running Tests
+### `.env` file (already present)
 
-Execute the test suite with pytest:
+```env
+GEMINI_API_KEY=your_google_gemini_key_here
+```
+
+### `config.py`
+
+* Loads and provides access to environment variables
+* Used across services to access sensitive config (API keys)
+
+---
+
+## 🐳 Docker Setup
+
+### Build and Run
 
 ```bash
-pytest
+docker build -t audio-interviewer-api .
+docker run -p 8000:8000 --env-file .env audio-interviewer-api
 ```
 
-## Docker Setup
+### Or use `docker-compose`:
 
-1. Build the Docker image:
-
-   ```bash
-   docker build -t ai-interview-api .
-   ```
-2. Run with Docker Compose:
-
-   ```bash
-   docker-compose up --build
-   ```
-
-   * The API will be available at `http://localhost:9000`.
-
-## Folder Structure
-
-```text
-ai_interview_api/
-├── app/
-│   ├── **main.py**           # Entry point with FastAPI initialization
-│   ├── **config.py**         # Environment and configuration loader
-│   ├── routers/              # API route definitions
-│   │   ├── generate.py       # /api/generate-question endpoint
-│   │   ├── evaluate.py       # /api/evaluate-answer endpoint
-│   │   └── next_question.py  # /api/next-question endpoint
-│   ├── services/             # Business logic implementations
-│   │   ├── question_generator.py
-│   │   ├── evaluation_service.py
-│   │   └── next_question_service.py
-│   └── schemas/              # Request/response Pydantic models
-├── tests/                    # Test suite (pytest)
-│   ├── test_question_generator.py
-│   ├── test_evaluation_service.py
-│   └── test_next_question_service.py
-├── Dockerfile                # Container image definition
-├── docker-compose.yml        # Multi-service Docker config
-├── requirements.txt          # Python dependencies
-├── .env                      # Environment variables
-├── .dockerignore             # Files ignored by Docker
-├── .github/                  # CI/CD workflows
-├── .git/                     # Git repository data
-└── venv/                     # Virtual environment (optional)
+```bash
+docker-compose up --build
 ```
 
-## Environment Variables
+---
 
-| Variable         | Description                |
-| ---------------- | -------------------------- |
-| `GEMINI_API_KEY` | Your Google Gemini API key |
+## 🔌 API Summary
 
-## Contributing
+| Method | Endpoint         | Description                          |
+| ------ | ---------------- | ------------------------------------ |
+| POST   | `/generate`      | Generate initial interview questions |
+| POST   | `/next-question` | Generate a follow-up question        |
+| POST   | `/evaluate`      | Evaluate a candidate's answer        |
 
-Contributions are welcome! Please open issues and submit pull requests.
+Swagger docs are available at:
 
+```
+http://localhost:8000/docs
+```
+
+---
+
+## 🧠 Core Components
+
+### `question_generator.py`
+
+* Uses OpenAI or Gemini models to generate relevant interview questions based on the JD.
+
+### `next_question_service.py`
+
+* Takes the last Q\&A and generates a thoughtful follow-up.
+
+### `evaluation_service.py`
+
+* Uses an LLM to evaluate the answer and return a detailed breakdown.
+
+Each service is designed to be independent and testable.
+
+---
+
+## ✅ Testing
+
+### Framework
+
+* Uses **Pytest** for unit testing
+* Each router and service file has a corresponding test
+
+### Run All Tests
+
+```bash
+python-m pytest
+```
+
+### Test Coverage
+
+* Coverage is tracked via `htmlcov/`
+* View full report:
+
+```bash
+python -m pytest --cov=app --cov-report=html
+open htmlcov/index.html
+
+Coverage :
+![Coverage Report](image.png)
+
+```
+
+### Test Files
+
+* `test_generate.py` – Tests JD → questions logic
+* `test_next_question.py` – Tests Q\&A → next question
+* `test_evaluate.py` – Tests transcript evaluation and scoring
+
+Mocks are used to simulate LLM responses for isolated testing.
+
+---
+
+## 📌 Notes
+
+* All services follow a clear dependency injection style for easier mocking and testing.
+* API input/output is strongly typed using Pydantic schemas.
+* Designed to integrate smoothly with frontend systems that handle voice recording, STT, and user sessions.
+
+---
+
+## 👨‍💻 Author
+
+**Saubhik Dey**
+AI Interview System –(FastAPI)
+
+---
 
