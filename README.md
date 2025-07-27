@@ -12,7 +12,7 @@ This FastAPI-based backend serves as the AI/ML component for an audio interview 
 
 ---
 
-## 📂 Project Structure
+## 📂 Project Structure  
 
 ```
 ├── app/
