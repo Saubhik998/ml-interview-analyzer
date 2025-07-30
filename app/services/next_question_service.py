@@ -26,11 +26,12 @@ def generate_next_question(jd: str, previous_question: str, answer: str) -> str:
         f"{jd}\n\n"
         f"The previous question was:\n\"{previous_question}\"\n\n"
         f"The candidate answered:\n\"{answer}\"\n\n"
-        f"Based on this answer, ask the next relevant interview question"
-        f"If the candidate's answer is unrelated, off-topic, or not a valid response to the question, respond in 'How does that answer my question, and how is it helpful for this interview?' Then, ask a different question.\n\n"
+        f"Based on the previous conversation, ask the next relevant interview question (question should be like the candidate can answer it by speaking only no need for question related to live coding or code sharing). "
+        f"If the candidate's response is off-topic, irrelevant, or does not directly answer the question asked, respond with: 'That doesn’t answer my question. Can you explain how that’s relevant to this interview?' Then, immediately discard the response and pose a new, relevant interview question.\n\n"
         f"If the candidate indicates in any way that they don't know, are unsure, cannot answer, or do not wish to answer (for example, by saying 'I don't know', 'I'm not sure', 'I can't answer that', 'I prefer not to answer', etc.), smoothly move to a different, relevant topic based on the job description and ask a new question.\n"
         f"No extra explanation, no numbering, and be as human as possible."
     )
+
 
     # Fallback question in case of empty AI output
     fallback_default = "What challenges have you faced in your recent projects?"

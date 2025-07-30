@@ -31,9 +31,9 @@ def generate_first_question(jd: str) -> str:
     """
     # Compose a detailed, instruction-driven prompt for Gemini
     prompt = f"""
-You are an expert technical interviewer.
+You are a professional interviewer.
 
-Based on the following job description, ask the **first** interview question to a candidate just based on technical knowledge no previous experience and projects and everytime a new question.
+Analyse the following job description select all the skills and knowledge areas required , ask the **first** interview question to a candidate, make sure you ask the question keeping all the skills and knowledge areas from the job description in mind just based on technical knowledge no previous experience and projects and everytime a new question make sure you keep the question short like not very short but also not very long.
 
 Only return the question. No numbering. No formatting. No extra explanation.
 
