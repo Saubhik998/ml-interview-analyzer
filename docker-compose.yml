@@ -1,20 +1,18 @@
-version: "3.9"
+version: "3.8"
 
 services:
-  fastapi-app:
+  llm-api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: fastapi-gemini-app
+    container_name: fastapi-llm-api
     ports:
-      - "9000:8000"  # Host:Container
-    env_file:
-      - .env
-    volumes:
-      - .:/app
+      - "8081:8081"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}   # Loads the Gemini API key from environment or .env file
+    restart: unless-stopped
     networks:
       - app-network
-    restart: unless-stopped
 
 networks:
   app-network:

@@ -27,7 +27,7 @@ def evaluate_interview(jd: str, questions: list[str], answers: list[str]) -> dic
     }, indent=2)
 
     prompt = f"""
-You are an AI assistant. Given a job description, a list of questions, and candidate answers, return _strictly valid_ JSON matching this schema exactly (no markdown fences, no extra fields): Like fo Strengths talk about the candidate's strengths, improvements talk about areas they can improve, and followUps are to schedule to next round of coding interview or not and what to ask the candidate in the coding round.
+You are an AI assistant. Given a job description, a list of questions, and candidate answers, return _strictly valid_ JSON matching this schema exactly (no markdown fences, no extra fields): Like fo Strengths talk about the candidate's strengths, improvements talk about areas they can improve, and followUps are to schedule to next round of interview or not and what to ask the candidate in the next round.
 
 {schema_example}
 
