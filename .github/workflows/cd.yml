@@ -3,6 +3,11 @@ name: Continuous Deployment - Docker Image
 on:
   push:
     branches: [main]
+    
+permissions:
+  contents: read
+  packages: write
+
 
 jobs:
   deploy:
