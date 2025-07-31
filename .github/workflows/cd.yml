@@ -22,4 +22,7 @@ jobs:
       - name:  Build and Push Image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/ai-interview-api:latest .
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker push ${{ secrets.DOCKER_USERNAME }}/ai-interview-api:latest
+
+ 
