@@ -89,13 +89,6 @@ GEMINI_API_KEY=your_google_gemini_key_here
 ### Build and Run
 
 ```bash
-docker build -t audio-interviewer-api .
-docker run -p 8000:8000 --env-file .env audio-interviewer-api
-```
-
-### Or use `docker-compose`:
-
-```bash
 docker-compose up --build
 ```
 

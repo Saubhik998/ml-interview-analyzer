@@ -12,7 +12,7 @@ genai.configure(api_key=GEMINI_KEY)
 logger = logging.getLogger(__name__)
 
 # Load model
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-2.0-flash")
 
 def evaluate_interview(jd: str, questions: list[str], answers: list[str]) -> dict:
     # Example schema with concrete JSON to guide output
