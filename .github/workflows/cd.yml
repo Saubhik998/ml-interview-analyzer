@@ -34,5 +34,5 @@ jobs:
 
       - name: Tag and push image to ghcr.io
         run: |
-          docker tag ${{ secrets.DOCKER_USERNAME }}/ai-interview-api:latest ghcr.io/Saubhik998/ai-interview-api:latest
-          docker push ghcr.io/Saubhik998/ai-interview-api:latest
+          docker tag ${{ secrets.DOCKER_USERNAME }}/ai-interview-api:latest ghcr.io/saubhik998/ai-interview-api:latest
+          docker push ghcr.io/saubhik998/ai-interview-api:latest
