@@ -1,11 +1,11 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import AsyncMock
 from fastapi import HTTPException
-from app.services.evaluation_service import evaluate_interview
+from app.services import evaluation_service
 
-@patch("app.services.evaluation_service.model.generate_content")
-def test_evaluate_interview_success(mock_generate):
-    # Valid Gemini response
+
+@pytest.mark.asyncio
+async def test_evaluate_interview_success(monkeypatch):
     fake_json = """
     {
       "jd": "Looking for a Python developer",
@@ -17,48 +17,48 @@ def test_evaluate_interview_success(mock_generate):
       "followUps": ["Can you describe a Python project you led?"]
     }
     """
-    mock_resp = MagicMock()
-    mock_resp.text = fake_json
-    mock_generate.return_value = mock_resp
+
+    async_mock = AsyncMock(return_value=fake_json)
+    monkeypatch.setattr(evaluation_service.gemini_client, "generate_text", async_mock)
 
     jd = "Looking for a Python developer"
     questions = ["What is your experience with Python?"]
     answers = ["I have worked with Python for 3 years."]
 
-    result = evaluate_interview(jd, questions, answers)
+    result = await evaluation_service.evaluate_interview(jd, questions, answers)
 
     assert result["score"] == 85
     assert "strengths" in result
     assert isinstance(result["strengths"], list)
 
-@patch("app.services.evaluation_service.model.generate_content")
-def test_evaluate_interview_invalid_json(mock_generate):
-    # Gemini returns malformed JSON
-    mock_resp = MagicMock()
-    mock_resp.text = "Not a JSON response"
-    mock_generate.return_value = mock_resp
+
+@pytest.mark.asyncio
+async def test_evaluate_interview_invalid_json(monkeypatch):
+    async_mock = AsyncMock(return_value="Not a JSON response")
+    monkeypatch.setattr(evaluation_service.gemini_client, "generate_text", async_mock)
 
     jd = "Test JD"
     questions = ["Q1"]
     answers = ["A1"]
 
     with pytest.raises(HTTPException) as exc_info:
-        evaluate_interview(jd, questions, answers)
+        await evaluation_service.evaluate_interview(jd, questions, answers)
 
     assert exc_info.value.status_code == 502
-    assert "malformed JSON" in exc_info.value.detail
+    assert "malformed json" in exc_info.value.detail.lower()
 
-@patch("app.services.evaluation_service.model.generate_content")
-def test_evaluate_interview_gemini_failure(mock_generate):
-    # Gemini raises an internal error
-    mock_generate.side_effect = Exception("Gemini is down")
+
+@pytest.mark.asyncio
+async def test_evaluate_interview_gemini_failure(monkeypatch):
+    async_mock = AsyncMock(side_effect=Exception("Gemini is down"))
+    monkeypatch.setattr(evaluation_service.gemini_client, "generate_text", async_mock)
 
     jd = "Test JD"
     questions = ["Q1"]
     answers = ["A1"]
 
     with pytest.raises(HTTPException) as exc_info:
-        evaluate_interview(jd, questions, answers)
+        await evaluation_service.evaluate_interview(jd, questions, answers)
 
     assert exc_info.value.status_code == 500
-    assert "Failed to generate AI evaluation" in exc_info.value.detail
+    assert "failed to generate ai evaluation" in exc_info.value.detail.lower()

@@ -5,5 +5,5 @@ google-generativeai
 httpx
 pydantic
 pytest
-httpx
+pytest-asyncio
 pytest-mock
