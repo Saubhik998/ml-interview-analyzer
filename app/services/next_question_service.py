@@ -3,8 +3,14 @@ from ..services import gemini_client, pre_generation_cache
 
 logger = logging.getLogger(__name__)
 
+
 def _build_prompt(jd: str, previous_question: str, answer: str) -> str:
-    # Prompt preserved exactly
+    """
+    Build the exact prompt sent to the LLM.
+
+    IMPORTANT: This function returns the prompt text verbatim. Do not alter
+    the wording unless you intentionally want to change the model's behavior.
+    """
     return (
         f"You are an professional interviewer for the following job:\n\n"
         f"{jd}\n\n"
@@ -26,17 +32,26 @@ def _build_prompt(jd: str, previous_question: str, answer: str) -> str:
         f"Keep the tone conversational and engaging. Make sure the question is clear, concise, and easy to understand. Avoid complex or technical jargon that might confuse the candidate."
     )
 
+
 async def generate_next_question(jd: str, previous_question: str, answer: str) -> str:
     """
-    Async function: try to use a cached pre-generated question first; otherwise generate a fresh one.
+    Return the next interview question (string).
+
+    Behavior:
+      1. Check pre_generation_cache for a cached question (fast path).
+      2. If none, build the prompt and call gemini_client.generate_text().
+      3. If the LLM returns an empty string, use `fallback_default`.
+      4. On any exception, return `fallback_error`.
+
+    This function intentionally returns raw strings from the LLM or the fallbacks.
     """
-    # Try cache first
+    # 1) Try cache first — very low latency if available
     cached_q = await pre_generation_cache.get_pre_generated_question(jd)
     if cached_q:
         logger.info("Using pre-generated question from cache.")
         return cached_q
 
-    # Build prompt and generate
+    # 2) Build prompt and call model
     prompt = _build_prompt(jd, previous_question, answer)
     fallback_default = "What challenges have you faced in your recent projects?"
     fallback_error = "Can you tell me more about your experience working in a team?"
@@ -44,16 +59,25 @@ async def generate_next_question(jd: str, previous_question: str, answer: str) -
     try:
         text = await gemini_client.generate_text(prompt)
         if text:
+            # Trim whitespace and return
             return text.strip()
+
+        # Treat empty/None as unexpected; use a safe default
         logger.warning("Gemini returned empty or unexpected format. Using fallback default.")
         return fallback_default
+
     except Exception as e:
+        # Log the error and return a safe fallback (do not raise here)
         logger.error("Error generating next question: %s", e)
         return fallback_error
+
 
 async def generate_next_question_stream(jd: str, previous_question: str, answer: str):
     """
     Async generator that yields chunks of the next question as they're generated.
+
+    Consumers should use `async for chunk in generate_next_question_stream(...)`.
+    Each `chunk` is a partial string produced by gemini_client.generate_stream.
     """
     prompt = _build_prompt(jd, previous_question, answer)
     async for chunk in gemini_client.generate_stream(prompt, chunk_size=64):
